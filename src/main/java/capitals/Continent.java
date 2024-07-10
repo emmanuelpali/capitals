@@ -1,0 +1,12 @@
+package capitals;
+
+public enum Continent {
+	AFRICA,
+	ASIA,
+	EUROPE,
+	SOUTH_AMERICA,
+	NORTH_AMERICA,
+	AUSTRALIA,
+	OCEANIA,
+	WORLD // THIS IS FOR THE IN CASE THERE IS A TIE BREAKER ROUND
+}
