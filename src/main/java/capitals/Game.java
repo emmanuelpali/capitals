@@ -80,7 +80,7 @@ public class Game {
         List<String> options = new ArrayList<>();
         options.add(country.getCapital());
         for (Country otherCountry : countries) {
-            if (!otherCountry.equals(country)) {
+            if (!otherCountry.equals(country) && otherCountry.getContinent() == country.getContinent()) {
                 options.add(otherCountry.getCapital());
             }
             if (options.size() == 4) {
