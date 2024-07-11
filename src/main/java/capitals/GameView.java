@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 
 public class GameView extends JFrame {
     private final Game game;
@@ -22,9 +23,11 @@ public class GameView extends JFrame {
     private final List<JCheckBox> optionCheckboxes;
     private final JPanel checkboxesPanel;
     private final JLabel scoreLabel;
+    private final JLabel answerFeedBack;
     private final Team team1;
     private final Team team2;
     private boolean isTeam1Turn;
+    private final JLabel turnLabel;
 
     public GameView(Game game, Team team1, Team team2) {
         this.game = game;
@@ -38,26 +41,38 @@ public class GameView extends JFrame {
         setLayout(new BorderLayout());
 
         questionLabel = new JLabel();
-        answerField = new JTextField();
+        answerField = new JTextField(16);
         submitButton = new JButton("Submit");
         scoreLabel = new JLabel();
+        answerFeedBack = new JLabel();
         optionCheckboxes = new ArrayList<>();
         checkboxesPanel = new JPanel();
         checkboxesPanel.setLayout(new BoxLayout(checkboxesPanel, BoxLayout.Y_AXIS));
+        turnLabel = new JLabel("Turn: " + team1.getName());
+
+        
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(new EmptyBorder(100, 200, 90, 0));
+        mainPanel.add(Box.createVerticalGlue());
+        mainPanel.add(turnLabel);
+        mainPanel.add(Box.createVerticalStrut(10)); // Add some space
+        mainPanel.add(scoreLabel);
+        mainPanel.add(Box.createVerticalStrut(10)); // Add some space
         mainPanel.add(questionLabel);
-        mainPanel.add(Box.createVerticalStrut(10)); // Add some space
+        mainPanel.add(Box.createVerticalStrut(10));
         mainPanel.add(answerField);
-        mainPanel.add(Box.createVerticalStrut(10)); // Add some space
+        mainPanel.add(Box.createVerticalStrut(10));
         mainPanel.add(checkboxesPanel);
-        mainPanel.add(Box.createVerticalStrut(10)); // Add some space
+        mainPanel.add(Box.createVerticalStrut(10));
         mainPanel.add(submitButton);
-
+        mainPanel.add(Box.createVerticalStrut(10));
         add(mainPanel, BorderLayout.CENTER);
-        add(scoreLabel, BorderLayout.EAST);
-
+        mainPanel.add(Box.createVerticalStrut(10)); // Add some space
+        mainPanel.add(answerFeedBack);
+        mainPanel.add(Box.createVerticalGlue());
+        mainPanel.add(Box.createGlue());
         submitButton.addActionListener(new SubmitButtonListener());
 
         displayNextQuestion();
@@ -122,14 +137,61 @@ public class GameView extends JFrame {
             } else {
                 scoreLabel.setText("The tiebreaker ended in a tie. No winner!");
                 submitButton.setEnabled(false);
+                displayEndOptions(winner);
             }
         } else {
-            scoreLabel.setText("The winner is " + winner.getName() + "!!");
-            submitButton.setEnabled(false);
+        	scoreLabel.setText("The winner is " + winner.getName() + "!!");
+            displayEndOptions(winner);
         }
     }
 
-    private class SubmitButtonListener implements ActionListener {
+    private void displayEndOptions(Team winner) {
+    	questionLabel.setText("");
+    	answerField.setVisible(false);
+    	clearCheckboxes();
+    	
+    	JButton newGameButton = new JButton("New Game");
+    	newGameButton.setAlignmentX(CENTER_ALIGNMENT);
+    	newGameButton.addActionListener(e -> {
+    		SetupPanel setupPanel = new SetupPanel(game, team1, team2);
+    		setupPanel.setVisible(true);
+    		dispose();
+    	});
+    	
+    	
+		JButton exitButton = new JButton("Exit Game");
+		exitButton.setAlignmentX(CENTER_ALIGNMENT);
+		exitButton.addActionListener(e -> System.exit(0));
+		
+		
+		
+		JPanel endGamePanel = new JPanel();
+
+		endGamePanel.setLayout(new BoxLayout(endGamePanel, BoxLayout.Y_AXIS));
+		endGamePanel.setBorder(new EmptyBorder(200, 10, 10, 10));
+		scoreLabel.setAlignmentX(CENTER_ALIGNMENT);
+		endGamePanel.add(scoreLabel);
+		endGamePanel.add(Box.createVerticalStrut(10));
+		endGamePanel.add(newGameButton);
+		endGamePanel.add(Box.createVerticalStrut(10));
+		endGamePanel.add(exitButton);
+
+		
+		getContentPane().removeAll();
+		add(endGamePanel, BorderLayout.CENTER);
+		revalidate();
+		repaint();
+	}
+
+//    private void initializeNewGame() {
+//    	game.initializeGame(game.getNumberOfQuestions(), game.getSelectedContinent());
+//    	isTeam1Turn = true;
+//    	turnLabel.setText("Turn : " + team1.getName());
+//    	submitButton.setEnabled(true);
+//    	displayNextQuestion();
+//	}
+    
+	private class SubmitButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             String answer;
@@ -148,16 +210,19 @@ public class GameView extends JFrame {
                 } else {
                     game.addPointToTeam(team2);
                 }
-                System.out.println("Point added to " + (isTeam1Turn ? team1.getName() : team2.getName()));
+                answerFeedBack.setText("Correct Answer: " + currentQuestion.getCorrectAnswer() + " Point added to " + (isTeam1Turn ? team1.getName() : team2.getName()));
             } else {
-                System.out.println("Incorrect answer or null question");
+                answerFeedBack.setText("Incorrect answer, no points added");
             }
 
             isTeam1Turn = !isTeam1Turn;
-            scoreLabel.setText(team1.getName() + ": " + team1.getScore() + 
-                                " | " + team2.getName() + ": " + team2.getScore());
+            turnLabel.setText("");
+            turnLabel.setText((isTeam1Turn ? team1.getName() : team2.getName()) + "'s turn to play. ");
+            scoreLabel.setText(team1.getName() + " : " + team1.getScore() + 
+                                " | " + team2.getName() + " : " + team2.getScore());
             game.incrementQuestionIndex();
             displayNextQuestion();
+            
         }
 
         private String getSelectedOption() {

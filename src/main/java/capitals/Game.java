@@ -50,7 +50,23 @@ public class Game {
         return countries;
     }
 
-    public void initializeGame(int numberOfQuestions, Continent continent) {
+    public int getNumberOfQuestions() {
+		return numberOfQuestions;
+	}
+
+	public void setNumberOfQuestions(int numberOfQuestions) {
+		this.numberOfQuestions = numberOfQuestions;
+	}
+
+	public Continent getSelectedContinent() {
+		return selectedContinent;
+	}
+
+	public void setSelectedContinent(Continent selectedContinent) {
+		this.selectedContinent = selectedContinent;
+	}
+
+	public void initializeGame(int numberOfQuestions, Continent continent) {
         this.numberOfQuestions = numberOfQuestions;
         this.selectedContinent = continent;
         this.questions = generateQuestions(numberOfQuestions, continent);
