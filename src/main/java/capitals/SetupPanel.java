@@ -3,6 +3,9 @@ package capitals;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
@@ -28,12 +31,13 @@ public class SetupPanel extends JFrame {
 		this.team1 = team1;
 		this.team2 = team2;
 		this.startButton = new JButton("Start Game");
-		
+		startButton.setVisible(false);
 		
 		setTitle("World Capitals Setup");
-		setSize(400,600);
+		setSize(600,600);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
+		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		
 		//add to the setup panel container
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -42,21 +46,54 @@ public class SetupPanel extends JFrame {
 		addRadioButton(panel, questionCountGroup, "6");
 		addRadioButton(panel, questionCountGroup, "10");
 		panel.add(Box.createVerticalStrut(10));
-		panel.add(createCenteredLabel("Select the continent to explore:"));
+		panel.add(createCenteredLabel("Select the continent you want to explore"));
 		continentGroup = new ButtonGroup();
-		for(Continent continent: Continent.values()) {
+		for(Continent continent : Continent.values()) {
 			addRadioButton(panel, continentGroup, continent.name());
 		}
 		panel.add(Box.createVerticalStrut(10));
 		panel.add(createCenteredComponent(startButton));
-		panel.add(Box.createVerticalStrut(10));
-		
+		panel.add(Box.createHorizontalStrut(10));
 		add(panel);
+		
 		startButton.addActionListener(new StartButtonListener());
+		
+		for(AbstractButton button : getAllElements(questionCountGroup)) {
+			button.addActionListener(e -> updateStartButtonVisibility());
+		}
+		for(AbstractButton button : getAllElements(continentGroup)) {
+			button.addActionListener(e -> updateStartButtonVisibility());
+		}
 	}
 	
+	private void updateStartButtonVisibility() {
+		boolean isQuestionCountSelected = getSelectedButtonText(questionCountGroup) != null;
+		boolean isContinentCountSelected = getSelectedButtonText(continentGroup) != null;
+		startButton.setVisible(isContinentCountSelected && isQuestionCountSelected);
+	}
+
+	private String getSelectedButtonText(ButtonGroup buttonGroup) {
+		for(Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+			AbstractButton button = buttons.nextElement();
+			if(button.isSelected()) {
+				return button.getText();
+			}
+			
+		}
+		return null;
+	}
+
+	private List<AbstractButton> getAllElements(ButtonGroup group) {
+		List<AbstractButton> buttons = new ArrayList<>();
+		for(Enumeration<AbstractButton> e = group.getElements(); e.hasMoreElements();) {
+			buttons.add(e.nextElement());
+		}
+		return buttons;
+	}
+
 	private void addRadioButton(JPanel panel, ButtonGroup group, String string) {
 		JRadioButton radioButton = new JRadioButton(string);
+		radioButton.setAlignmentX(CENTER_ALIGNMENT);
 		group.add(radioButton);
 		panel.add(createCenteredComponent(radioButton));
 	}
@@ -72,30 +109,21 @@ public class SetupPanel extends JFrame {
 
 	private Component createCenteredLabel(String string) {
 		JLabel label = new JLabel(string);
-//		label.setAlignmentX(CENTER_ALIGNMENT);
+		label.setAlignmentX(CENTER_ALIGNMENT);
 		return label;
 	}
 
 	private class StartButtonListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			Integer numberOfQuestions = Integer.parseInt(getSelectedButtonText(questionCountGroup));
+			int numberOfQuestions = Integer.parseInt(getSelectedButtonText(questionCountGroup));
 			Continent selectedContinent = Continent.valueOf(getSelectedButtonText(continentGroup));
+			
 			game.initializeGame(numberOfQuestions, selectedContinent);
 			
 			GameView gameView = new GameView(game, team1, team2);
 			gameView.setVisible(true);
 			setVisible(false);
-		}
-
-		private String getSelectedButtonText(ButtonGroup buttonGroup) {
-			for(java.util.Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
-				AbstractButton button = buttons.nextElement();
-				if(button.isSelected()) {
-					return button.getText();
-				}
-			}
-			return null;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package capitals;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public class GameView extends JFrame {
 
         questionLabel = new JLabel();
         answerField = new JTextField(16);
+        answerField.setMaximumSize(answerField.getPreferredSize());
+        int fieldHeight = 20;
+        answerField.setPreferredSize(new Dimension(answerField.getPreferredSize().width, fieldHeight));
         submitButton = new JButton("Submit");
         scoreLabel = new JLabel();
         answerFeedBack = new JLabel();
@@ -54,7 +58,7 @@ public class GameView extends JFrame {
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBorder(new EmptyBorder(100, 200, 90, 0));
+       // mainPanel.setBorder(new EmptyBorder(100, 200, 90, 0));
         mainPanel.add(Box.createVerticalGlue());
         mainPanel.add(turnLabel);
         mainPanel.add(Box.createVerticalStrut(10)); // Add some space
@@ -73,8 +77,25 @@ public class GameView extends JFrame {
         mainPanel.add(answerFeedBack);
         mainPanel.add(Box.createVerticalGlue());
         mainPanel.add(Box.createGlue());
-        submitButton.addActionListener(new SubmitButtonListener());
 
+        
+        Box outerBox = Box.createVerticalBox();
+        outerBox.add(Box.createVerticalGlue());
+        outerBox.add(mainPanel);
+        outerBox.add(Box.createVerticalGlue());
+        
+        JPanel outerPanel = new JPanel();
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.X_AXIS));
+        outerPanel.add(Box.createHorizontalGlue());
+        outerPanel.add(outerBox);
+        outerPanel.add(Box.createHorizontalGlue());
+        
+        getContentPane().removeAll();
+        add(outerPanel, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+        
+        submitButton.addActionListener(new SubmitButtonListener());
         displayNextQuestion();
     }
 
