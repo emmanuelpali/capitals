@@ -4,11 +4,11 @@ import java.util.List;
 
 public class Question {
 	private final Country country;
-	
+
 	private final String question;
 	private final String correctAnswer;
 	private final List<String> options;
-	
+
 	public Question(Country country, String question, String correctAnswer, List<String> options) {
 		this.country = country;
 		this.question = question;
@@ -31,8 +31,8 @@ public class Question {
 	public Country getCountry() {
 		return country;
 	}
-	
+
 	public boolean isCorrect(String capital) {
-		return correctAnswer.equals(capital);
+		return correctAnswer.equalsIgnoreCase(capital);
 	}
 }

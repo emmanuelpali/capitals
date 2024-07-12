@@ -5,23 +5,18 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
 
 public class GameView extends JFrame {
     private final Game game;
     private final JLabel questionLabel;
     private final JButton submitButton;
     private final JTextField answerField;
-    private final List<JCheckBox> optionCheckboxes;
+    private final ButtonGroup optionButtonGroup;
     private final JPanel checkboxesPanel;
     private final JLabel scoreLabel;
     private final JLabel answerFeedBack;
@@ -42,14 +37,14 @@ public class GameView extends JFrame {
         setLayout(new BorderLayout());
 
         questionLabel = new JLabel();
-        answerField = new JTextField(16);
+        answerField = new JTextField(20);
         answerField.setMaximumSize(answerField.getPreferredSize());
         int fieldHeight = 20;
         answerField.setPreferredSize(new Dimension(answerField.getPreferredSize().width, fieldHeight));
         submitButton = new JButton("Submit");
         scoreLabel = new JLabel();
         answerFeedBack = new JLabel();
-        optionCheckboxes = new ArrayList<>();
+        optionButtonGroup = new ButtonGroup();
         checkboxesPanel = new JPanel();
         checkboxesPanel.setLayout(new BoxLayout(checkboxesPanel, BoxLayout.Y_AXIS));
         turnLabel = new JLabel("Turn: " + team1.getName());
@@ -78,7 +73,7 @@ public class GameView extends JFrame {
         mainPanel.add(Box.createVerticalGlue());
         mainPanel.add(Box.createGlue());
 
-        
+       
         Box outerBox = Box.createVerticalBox();
         outerBox.add(Box.createVerticalGlue());
         outerBox.add(mainPanel);
@@ -96,9 +91,40 @@ public class GameView extends JFrame {
         repaint();
         
         submitButton.addActionListener(new SubmitButtonListener());
+		for(AbstractButton button : getAllElements(optionButtonGroup)) {
+			button.addActionListener(e -> updateStartButtonVisibility());
+		}
+		
         displayNextQuestion();
     }
 
+	private void updateStartButtonVisibility() {
+		String selectedOption = getSelectedButtonText(optionButtonGroup);
+		System.out.println(selectedOption);
+		boolean isOptionSelected = selectedOption != null;
+		submitButton.setVisible(isOptionSelected);
+		System.out.println(isOptionSelected);
+	}
+    
+	private List<AbstractButton> getAllElements(ButtonGroup group) {
+		List<AbstractButton> buttons = new ArrayList<>();
+		for(Enumeration<AbstractButton> e = group.getElements(); e.hasMoreElements();) {
+			buttons.add(e.nextElement());
+		}
+		return buttons;
+	}
+	
+	private String getSelectedButtonText(ButtonGroup buttonGroup) {
+		for(Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+			AbstractButton button = buttons.nextElement();
+			if(button.isSelected()) {
+				return button.getText();
+			}
+			
+		}
+		return null;
+	}
+    
     private void displayNextQuestion() {
         if (game.isGameOver() || (game.isTiebreaker() && game.getCurrentQuestion() == null)) {
             endGame();
@@ -111,37 +137,43 @@ public class GameView extends JFrame {
                 questionLabel.setText("Tiebreaker: What is the capital of " + question.getCountry().getName());
                 answerField.setText("");
                 answerField.setVisible(true);
-                clearCheckboxes();
-                setCheckboxVisibility(false);
+                clearRadioButtons();
+                setRadioButtonVisibility(false);
+                submitButton.setVisible(true);
             } else {
                 questionLabel.setText("What is the capital of " + question.getCountry().getName());
                 answerField.setVisible(false);
                 List<String> options = question.getOptions();
                 displayOptions(options);
-                setCheckboxVisibility(true);
+                setRadioButtonVisibility(true);
+                updateStartButtonVisibility(); 
             }
         }
     }
 
     private void displayOptions(List<String> options) {
-        clearCheckboxes();
+    	clearRadioButtons();
         for (String option : options) {
-            JCheckBox checkBox = new JCheckBox(option);
-            optionCheckboxes.add(checkBox);
-            checkboxesPanel.add(checkBox);
+            JRadioButton radioButton = new JRadioButton(option);
+            optionButtonGroup.add(radioButton);
+            checkboxesPanel.add(radioButton);
+            radioButton.addActionListener(e -> updateStartButtonVisibility());
         }
         checkboxesPanel.revalidate();
         checkboxesPanel.repaint();
+        updateStartButtonVisibility();
     }
 
-    private void setCheckboxVisibility(boolean visible) {
-        for (JCheckBox checkBox : optionCheckboxes) {
-            checkBox.setVisible(visible);
+    private void setRadioButtonVisibility(boolean visible) {
+    	Enumeration<AbstractButton> buttons = optionButtonGroup.getElements();
+        while(buttons.hasMoreElements()) {
+        	AbstractButton button = buttons.nextElement();
+        	button.setVisible(visible);
         }
     }
 
-    private void clearCheckboxes() {
-        optionCheckboxes.clear();
+    private void clearRadioButtons() {
+        optionButtonGroup.clearSelection();
         checkboxesPanel.removeAll();
         checkboxesPanel.revalidate();
         checkboxesPanel.repaint();
@@ -169,7 +201,7 @@ public class GameView extends JFrame {
     private void displayEndOptions(Team winner) {
     	questionLabel.setText("");
     	answerField.setVisible(false);
-    	clearCheckboxes();
+    	clearRadioButtons();
     	
     	JButton newGameButton = new JButton("New Game");
     	newGameButton.setAlignmentX(CENTER_ALIGNMENT);
@@ -204,20 +236,13 @@ public class GameView extends JFrame {
 		repaint();
 	}
 
-//    private void initializeNewGame() {
-//    	game.initializeGame(game.getNumberOfQuestions(), game.getSelectedContinent());
-//    	isTeam1Turn = true;
-//    	turnLabel.setText("Turn : " + team1.getName());
-//    	submitButton.setEnabled(true);
-//    	displayNextQuestion();
-//	}
-    
 	private class SubmitButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             String answer;
             if (game.isTiebreaker()) {
                 answer = answerField.getText();
+
                 System.out.println("Answer: " + answer);
             } else {
                 answer = getSelectedOption();
@@ -243,14 +268,17 @@ public class GameView extends JFrame {
                                 " | " + team2.getName() + " : " + team2.getScore());
             game.incrementQuestionIndex();
             displayNextQuestion();
+            //updateStartButtonVisibility();
             
         }
 
         private String getSelectedOption() {
-            for (JCheckBox checkBox : optionCheckboxes) {
-                if (checkBox.isSelected()) {
-                    return checkBox.getText();
-                }
+            Enumeration<AbstractButton> buttons = optionButtonGroup.getElements();
+            while(buttons.hasMoreElements()) {
+            	AbstractButton button = buttons.nextElement();
+            	if(button.isSelected()) {
+            		return button.getText();
+            	}
             }
             return null;
         }

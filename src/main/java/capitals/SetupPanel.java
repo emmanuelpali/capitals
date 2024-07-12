@@ -93,7 +93,6 @@ public class SetupPanel extends JFrame {
 
 	private void addRadioButton(JPanel panel, ButtonGroup group, String string) {
 		JRadioButton radioButton = new JRadioButton(string);
-		radioButton.setAlignmentX(CENTER_ALIGNMENT);
 		group.add(radioButton);
 		panel.add(createCenteredComponent(radioButton));
 	}
