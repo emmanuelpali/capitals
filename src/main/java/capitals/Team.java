@@ -3,7 +3,7 @@ package capitals;
 public class Team {
 	private String name;
 	private Integer score;
-	
+
 	public Team(String name) {
 		this.name = name;
 		this.score = 0;
@@ -13,7 +13,6 @@ public class Team {
 		return name;
 	}
 
-
 	public Integer getScore() {
 		return score;
 	}
@@ -21,6 +20,5 @@ public class Team {
 	public void incrementScore() {
 		this.score++;
 	}
-	
-	
+
 }

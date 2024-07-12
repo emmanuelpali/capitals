@@ -1,11 +1,6 @@
 package capitals;
 
 public enum Continent {
-	AFRICA,
-	ASIA,
-	EUROPE,
-	SOUTH_AMERICA,
-	NORTH_AMERICA,
-	OCEANIA,
-	WORLD // THIS IS FOR THE IN CASE THERE IS A TIE BREAKER ROUND
+	SOUTH_AMERICA, NORTH_AMERICA, OCEANIA, AFRICA, EUROPE, ASIA, WORLD, // the inclusion of WORLD is for tie breaker
+																		// rounds
 }

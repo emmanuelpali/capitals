@@ -4,7 +4,7 @@ public class Country {
 	private String name;
 	private String capital;
 	private Continent continent;
-	
+
 	public Country(String name, String capital, Continent continent) {
 		this.name = name;
 		this.capital = capital;
@@ -22,6 +22,5 @@ public class Country {
 	public Continent getContinent() {
 		return continent;
 	}
-	
-	
+
 }

@@ -1,6 +1,8 @@
 package capitals;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+
+//This class simply collects the data neede to start the game
 public class SetupPanel extends JFrame {
 	private final Game game;
 	private final Team team1;
@@ -26,6 +30,7 @@ public class SetupPanel extends JFrame {
 	private final ButtonGroup continentGroup;
 	private final JButton startButton;
 	
+
 	public SetupPanel(Game game, Team team1, Team team2) {
 		this.game = game;
 		this.team1 = team1;
@@ -33,13 +38,19 @@ public class SetupPanel extends JFrame {
 		this.startButton = new JButton("Start Game");
 		startButton.setVisible(false);
 		
+		startButton.setFont(new Font("Boli", Font.BOLD, 18));
+		startButton.setBackground(Color.black);
+		startButton.setForeground(Color.WHITE);
+
+		
 		setTitle("World Capitals Setup");
-		setSize(600,600);
+		setSize(600, 600);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-		
-		//add to the setup panel container
+
+		// add to the setup panel container
 		JPanel panel = new JPanel();
+		panel.setFont(new Font("Arial", Font.ITALIC, 20));
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.add(createCenteredLabel("How many questions would You Like to answer?"));
 		questionCountGroup = new ButtonGroup();
@@ -48,24 +59,24 @@ public class SetupPanel extends JFrame {
 		panel.add(Box.createVerticalStrut(10));
 		panel.add(createCenteredLabel("Select the continent you want to explore"));
 		continentGroup = new ButtonGroup();
-		for(Continent continent : Continent.values()) {
+		for (Continent continent : Continent.values()) {
 			addRadioButton(panel, continentGroup, continent.name());
 		}
 		panel.add(Box.createVerticalStrut(10));
 		panel.add(createCenteredComponent(startButton));
 		panel.add(Box.createHorizontalStrut(10));
 		add(panel);
-		
+
 		startButton.addActionListener(new StartButtonListener());
-		
-		for(AbstractButton button : getAllElements(questionCountGroup)) {
+
+		for (AbstractButton button : getAllElements(questionCountGroup)) {
 			button.addActionListener(e -> updateStartButtonVisibility());
 		}
-		for(AbstractButton button : getAllElements(continentGroup)) {
+		for (AbstractButton button : getAllElements(continentGroup)) {
 			button.addActionListener(e -> updateStartButtonVisibility());
 		}
 	}
-	
+
 	private void updateStartButtonVisibility() {
 		boolean isQuestionCountSelected = getSelectedButtonText(questionCountGroup) != null;
 		boolean isContinentCountSelected = getSelectedButtonText(continentGroup) != null;
@@ -73,19 +84,19 @@ public class SetupPanel extends JFrame {
 	}
 
 	private String getSelectedButtonText(ButtonGroup buttonGroup) {
-		for(Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
-			if(button.isSelected()) {
+			if (button.isSelected()) {
 				return button.getText();
 			}
-			
+
 		}
 		return null;
 	}
 
 	private List<AbstractButton> getAllElements(ButtonGroup group) {
 		List<AbstractButton> buttons = new ArrayList<>();
-		for(Enumeration<AbstractButton> e = group.getElements(); e.hasMoreElements();) {
+		for (Enumeration<AbstractButton> e = group.getElements(); e.hasMoreElements();) {
 			buttons.add(e.nextElement());
 		}
 		return buttons;
@@ -99,8 +110,9 @@ public class SetupPanel extends JFrame {
 
 	private Component createCenteredComponent(JComponent component) {
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		//panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		panel.add(Box.createHorizontalGlue());
+		component.setFont(new Font("Boli", Font.ITALIC, 16));
 		panel.add(component);
 		panel.add(Box.createHorizontalGlue());
 		return panel;
@@ -109,17 +121,18 @@ public class SetupPanel extends JFrame {
 	private Component createCenteredLabel(String string) {
 		JLabel label = new JLabel(string);
 		label.setAlignmentX(CENTER_ALIGNMENT);
+		label.setFont(new Font("Boli", Font.BOLD, 16));
 		return label;
 	}
 
-	private class StartButtonListener implements ActionListener{
+	private class StartButtonListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			int numberOfQuestions = Integer.parseInt(getSelectedButtonText(questionCountGroup));
 			Continent selectedContinent = Continent.valueOf(getSelectedButtonText(continentGroup));
-			
+
 			game.initializeGame(numberOfQuestions, selectedContinent);
-			
+
 			GameView gameView = new GameView(game, team1, team2);
 			gameView.setVisible(true);
 			setVisible(false);
